@@ -26,6 +26,8 @@
 		BC2D1929289A8A7700066723 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC2D1921289A8A7700066723 /* HistoryViewController.m */; };
 		BC2D192A289A8A7700066723 /* CardGameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC2D1925289A8A7700066723 /* CardGameViewController.m */; };
 		BC2D192B289A8A7700066723 /* PlayingCardGameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC2D1927289A8A7700066723 /* PlayingCardGameViewController.m */; };
+		BC2D1936289A8BE000066723 /* cardfront.png in Resources */ = {isa = PBXBuildFile; fileRef = BC2D1934289A8BE000066723 /* cardfront.png */; };
+		BC2D1937289A8BE000066723 /* cardback.png in Resources */ = {isa = PBXBuildFile; fileRef = BC2D1935289A8BE000066723 /* cardback.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +67,8 @@
 		BC2D1925289A8A7700066723 /* CardGameViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardGameViewController.m; path = "Controller + View/CardGameViewController.m"; sourceTree = "<group>"; };
 		BC2D1926289A8A7700066723 /* PlayingCardGameViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayingCardGameViewController.h; path = "Controller + View/PlayingCardGameViewController.h"; sourceTree = "<group>"; };
 		BC2D1927289A8A7700066723 /* PlayingCardGameViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PlayingCardGameViewController.m; path = "Controller + View/PlayingCardGameViewController.m"; sourceTree = "<group>"; };
+		BC2D1934289A8BE000066723 /* cardfront.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cardfront.png; path = Media/cardfront.png; sourceTree = "<group>"; };
+		BC2D1935289A8BE000066723 /* cardback.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cardback.png; path = Media/cardback.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +101,7 @@
 		BC2D18E9289A843600066723 /* Matchismo4 */ = {
 			isa = PBXGroup;
 			children = (
+				BC2D1933289A8BCD00066723 /* Media */,
 				BC2D191F289A8A5C00066723 /* Controller + View */,
 				BC2D1904289A89CA00066723 /* Models */,
 				BC2D18EA289A843600066723 /* AppDelegate.h */,
@@ -151,6 +156,15 @@
 				BC2D1920289A8A7700066723 /* SetCardGameViewController.m */,
 			);
 			name = "Controller + View";
+			sourceTree = "<group>";
+		};
+		BC2D1933289A8BCD00066723 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				BC2D1935289A8BE000066723 /* cardback.png */,
+				BC2D1934289A8BE000066723 /* cardfront.png */,
+			);
+			name = Media;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -211,8 +225,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC2D18FA289A843800066723 /* LaunchScreen.storyboard in Resources */,
+				BC2D1937289A8BE000066723 /* cardback.png in Resources */,
 				BC2D18F7289A843800066723 /* Assets.xcassets in Resources */,
 				BC2D18F5289A843600066723 /* Main.storyboard in Resources */,
+				BC2D1936289A8BE000066723 /* cardfront.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
