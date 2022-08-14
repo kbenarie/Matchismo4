@@ -8,6 +8,7 @@
 
 @property (nonatomic, readwrite) NSInteger score;
 @property (nonatomic, readwrite) NSUInteger gameMode;
+@property (nonatomic, readwrite) Deck *deck;
 
 @end
 
@@ -37,6 +38,7 @@ static int const GAMEMODE_ADDITION_TO_GET_CARDS = 2;
 }
 
 - (void)initCardsWithCount:(NSInteger)count UsingDeck:(Deck *)deck {
+  _deck = deck;
   for (int i=0; i<count; i++){
   Card *card = [deck drawRandomCard];
   if (card){

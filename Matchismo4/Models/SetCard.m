@@ -2,7 +2,17 @@
 // Created by Keren Ben Arie.
 
 #import "SetCard.h"
-#import <UIKit/UIKit.h>
+
+// TODO: change place to H. here for now because of arm duplicates error.
+NSString* const DIAMOND = @"diamond";
+NSString* const OVAL = @"oval";
+NSString* const SQUIGGLE = @"squiggle";
+NSString* const PURPLE = @"purple";
+NSString* const GREEN = @"green";
+NSString* const RED = @"red";
+NSString* const SOLID = @"solid";
+NSString* const STRIPPED = @"stripped";
+NSString* const UNFILLED = @"unfilled";
 
 @implementation SetCard
 
@@ -11,14 +21,8 @@ static NSString *SUIT = @"suit";
 static NSString *RANK = @"rank";
 static NSString *COLOR = @"color";
 static NSString *SHADING = @"shading";
-NSString* const PURPLE = @"purple";
-NSString* const GREEN = @"green";
-NSString* const RED = @"red";
-NSString* const SOLID = @"solid";
-NSString* const STRIPPED = @"striped";
-NSString* const UNFILLED = @"unfilled";
 
-- (int)match:(NSArray *)otherCards {
+- (int)match:(NSArray<Card *> *)otherCards {
   int score = SCORE;
   NSMutableArray *cards = [[NSMutableArray alloc] initWithArray:otherCards];
   NSMutableSet *rankSet = [[NSMutableSet alloc] init];
@@ -65,19 +69,18 @@ NSString* const UNFILLED = @"unfilled";
   }
 }
 
-+ (NSArray *)rankStrings {
++ (NSArray<NSString *> *)rankStrings {
   return @[@"?",@"1", @"2", @"3"];
 }
 
-+ (NSArray *)validSuits {
-  return @[@"▲", @"●", @"■"];
++ (NSArray<NSString *> *)validSuits {
+  return @[SQUIGGLE, OVAL, DIAMOND];
 }
-
-+ (NSArray *)validColors {
++ (NSArray<NSString *> *)validColors {
   return @[PURPLE,GREEN,RED];
 }
 
-+ (NSArray *)validShadings {
++ (NSArray<NSString *> *)validShadings {
   return @[SOLID,STRIPPED,UNFILLED];
 }
 

@@ -8,11 +8,20 @@
 #import <UIKit/UIKit.h>
 
 #import "Deck.h"
+#import "CardView.h"
+#import "Grid.h"
+#import "CardMatchingGame.h"
 
 @interface CardGameViewController : UIViewController
-
+@property (weak, nonatomic) IBOutlet UIView *boardView;
+@property (nonatomic, strong) CardMatchingGame *game;
+@property (strong, nonatomic) NSMutableArray<CardView *> *cardViews;
+@property (strong, nonatomic, readonly) Grid  *grid;
 - (Deck *)createDeck; // abstract
 - (int)createGameMode; // abstract
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender;
+- (CardView *)newCardViewWithFrame:(CGRect)frame;
+- (void)setup;
+- (BOOL)mapCard:(Card *)card toView:(CardView *)view;
+-(int)cardsInitialAmount;
 @end
 

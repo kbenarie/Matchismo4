@@ -11,7 +11,7 @@ static int const SUIT_MATCH_SCORE = 1;
 static float const LESS_MATCHES_THAN_CARDS_PENALTY = 0.1f;
 static int const MINIMAL_SCORE_TO_APPLY_PENALTY = 1;
 
-- (int)match:(NSArray *)otherCards {
+- (int)match:(NSArray<Card *> *)otherCards {
   int score = 0;
   int matchesCount = 0;
   NSMutableArray *mutableOtherCards = [[NSMutableArray alloc] initWithArray:otherCards];
@@ -62,15 +62,15 @@ static int const MINIMAL_SCORE_TO_APPLY_PENALTY = 1;
   }
 }
 
-+ (NSArray *)rankStrings {
++ (NSArray<NSString *> *)rankStrings {
   return @[@"?", @"A", @"2", @"3",
            @"4", @"5", @"6", @"7",
            @"8", @"9", @"10", @"J",
            @"Q"];
 }
 
-+ (NSArray *)validSuits {
-  return @[@"♥", @"♠", @"♣",@"♦"];
++ (NSArray<NSString *> *)validSuits {
+  return @[@"♥︎", @"♠", @"♣",@"♦"];
 }
 
 @end

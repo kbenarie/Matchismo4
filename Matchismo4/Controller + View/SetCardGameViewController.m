@@ -5,16 +5,44 @@
 #import "SetPlayingCardDeck.h"
 #import "SetCard.h"
 #import "Turn.h"
+#import "SetCardView.h"
+#import "Grid.h"
 
 @interface SetCardGameViewController ()
+
+@property (weak, nonatomic) IBOutlet SetCardView *setCardView;
+@property (strong, nonatomic) UIDynamicAnimator *animator;
+@property (strong, nonatomic) UIAttachmentBehavior *attachmentBehaviour;
+@property (weak, nonatomic) IBOutlet UIView *card;
+@property (strong, nonatomic) Deck *deck;
 
 @end
 
 @implementation SetCardGameViewController
 
 static int const SET_GAME_MODE = 1;
-static NSString *const NO_MATCH = @" Not a set! Penalty: ";
-static NSString *const MATCH = @" Are a set! Got ";
+
+-(int)cardsInitialAmount {
+  return 12;
+}
+#pragma mark - Lazy Inits
+
+-(UIDynamicAnimator *)animator {
+  if (!_animator) _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.card];
+  return _animator;
+}
+
+-(UIAttachmentBehavior *)attachmentBehaviour {
+  if (!_attachmentBehaviour) _attachmentBehaviour = [[UIAttachmentBehavior alloc] init];
+  return _attachmentBehaviour;
+}
+
+- (Deck *)deck {
+  if (!_deck) _deck = [[SetPlayingCardDeck alloc] init];
+  return _deck;
+}
+
+#pragma mark - methods
 
 - (Deck *)createDeck {
   return [[SetPlayingCardDeck alloc] init];
@@ -24,51 +52,23 @@ static NSString *const MATCH = @" Are a set! Got ";
   return SET_GAME_MODE;
 }
 
--(NSDictionary *)getAttributesForCard:(Card *)card {
-  SetCard *setCard = (SetCard *) card;
-  UIColor *color = [SetCardGameViewController colorsMapping][setCard.color];
-  return [SetCardGameViewController shadingsMappingWithColor:color][setCard.shading];
+- (CardView *)newCardViewWithFrame:(CGRect)frame { return [[SetCardView alloc] initWithFrame:frame];
 }
 
-- (NSAttributedString *)titleForCard:(Card *)card {
-  if (!card.isChosen) {
-    return [[NSMutableAttributedString alloc] initWithString:@""];
-  }
-  return [self attributedTitle:card];
-}
-
-- (NSAttributedString *)attributedTitle:(Card *)card {
-NSAttributedString *attributredContents =[[NSMutableAttributedString alloc] initWithString:card.contents attributes:[self getAttributesForCard:card]];
-return attributredContents;
-}
-
-- (NSAttributedString *)getAttributedTurnDescription:(Turn *)turn {
-  NSMutableAttributedString *score = [[NSMutableAttributedString alloc] initWithString:@""];
-  if ([turn.chosenCards count] == SET_GAME_MODE + 2) {
-    NSString *match = [[NSString alloc] initWithFormat:@"%@%ld points!",turn.matched ? MATCH : NO_MATCH, turn.pointsUpdate];
-    [score appendAttributedString:[[NSMutableAttributedString alloc] initWithString:match]];
-  }
-  NSMutableAttributedString *attributedCards = [[NSMutableAttributedString alloc] initWithString:@""];
-  for (Card *card in turn.chosenCards) {
-    SetCard *setCard = (SetCard *) card;
-    [attributedCards appendAttributedString:[self attributedTitle:setCard]];
-  }
-  [attributedCards appendAttributedString:score];
-  return attributedCards;
-}
-
-+ (NSDictionary *)shadingsMappingWithColor:(UIColor *)color {
-  return @{SOLID:@{NSForegroundColorAttributeName: color},
-           STRIPPED:@{NSStrokeColorAttributeName: color,
-                     NSStrokeWidthAttributeName: @(-5),
-                     NSForegroundColorAttributeName:[color colorWithAlphaComponent:0.2F]},
-           UNFILLED:@{NSStrokeColorAttributeName: color,
-                      NSStrokeWidthAttributeName: @(5)}
-  };
-}
-
-+ (NSDictionary *)colorsMapping {
-  return @{PURPLE:[UIColor purpleColor], GREEN:[UIColor greenColor], RED:[UIColor redColor]};
+- (BOOL)mapCard:(Card *)card toView:(CardView *)view {
+    if (![card isKindOfClass:[SetCard class]] ||
+        ![view isKindOfClass:[SetCardView class]]) {
+        return NO;
+    }
+    SetCardView *cardView = (SetCardView *)view;
+    SetCard *setCard = (SetCard *)card;
+    cardView.rank = setCard.rank;
+    cardView.suit = setCard.suit;
+    cardView.color = setCard.color;
+    cardView.shading = setCard.shading;
+    cardView.selected = setCard.isChosen;
+    cardView.enabled = !setCard.isMatched;
+    return YES;
 }
 
 @end

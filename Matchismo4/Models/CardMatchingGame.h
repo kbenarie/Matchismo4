@@ -14,6 +14,7 @@
 - (void)resetWithCardCount:(NSUInteger)count UsingDeck:(Deck *)deck;
 -(void)setGameMode:(NSUInteger)mode;
 -(NSUInteger)gameMode;
+@property (nonatomic, getter=isStarted) BOOL started;
 @property (nonatomic,strong) Turn *turn;
 @property (nonatomic, strong) NSMutableArray *cards;
 @property (nonatomic, readonly) NSInteger score;
