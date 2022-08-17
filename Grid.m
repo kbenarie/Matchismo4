@@ -1,23 +1,22 @@
-// Copyright (c) 2022 Lightricks. All rights reserved.
-// Created by Keren Ben Arie.
+//
+//  Grid.m
+//
+//  CS193p Fall 2013
+//  Copyright (c) 2013 Stanford University.
+//  All rights reserved.
+//
 
 #import "Grid.h"
 
-@interface Grid ()
+@interface Grid()
 @property (nonatomic) BOOL resolved;
 @property (nonatomic) BOOL unresolvable;
+@property (nonatomic, readwrite) NSUInteger rowCount;
+@property (nonatomic, readwrite) NSUInteger columnCount;
+@property (nonatomic, readwrite) CGSize cellSize;
 @end
 
 @implementation Grid
-
--(instancetype)initWithMinimumCellsNumber:(NSInteger)minimumCellsNumber andCellSize:(CGSize)cellSize {
-  self = [super init];
-  if (self) {
-    _minimumCellsNumber = minimumCellsNumber;
-    _cellSize = cellSize;
-  }
-  return self;
-}
 
 - (void)validate
 {
@@ -28,12 +27,12 @@
     double overallHeight = ABS(self.size.height);
     double aspectRatio = ABS(self.cellAspectRatio);
 
-    if (!self.minimumCellsNumber || !aspectRatio || !overallWidth || !overallHeight) {
+    if (!self.minimumNumberOfCells || !aspectRatio || !overallWidth || !overallHeight) {
         self.unresolvable = YES;
         return; // invalid inputs
     }
 
-    double minCellWidth = self.minimumCellsNumber;
+    double minCellWidth = self.minCellWidth;
     double minCellHeight = self.minCellHeight;
     double maxCellWidth = self.maxCellWidth;
     double maxCellHeight = self.maxCellHeight;
@@ -64,16 +63,16 @@
                 self.unresolvable = YES;
             } else {
                 int rowCount = (int)(overallHeight / cellHeight);
-                if ((rowCount * columnCount >= self.minimumCellsNumber) &&
+                if ((rowCount * columnCount >= self.minimumNumberOfCells) &&
                     ((maxCellWidth <= minCellWidth) || (cellWidth <= maxCellWidth)) &&
                     ((maxCellHeight <= minCellHeight) || (cellHeight <= maxCellHeight))) {
                     if (flipped) {
-                        self.rows = columnCount;
-                        self.columns = rowCount;
-                      self.cellSize = CGSizeMake( cellHeight,  cellWidth);
+                        self.rowCount = columnCount;
+                        self.columnCount = rowCount;
+                        self.cellSize = CGSizeMake(cellHeight, cellWidth);
                     } else {
-                        self.rows = rowCount;
-                        self.columns = columnCount;
+                        self.rowCount = rowCount;
+                        self.columnCount = columnCount;
                         self.cellSize = CGSizeMake(cellWidth, cellHeight);
                     }
                     self.resolved = YES;
@@ -84,8 +83,8 @@
     }
 
     if (!self.resolved) {
-        self.rows = 0;
-        self.columns = 0;
+        self.rowCount = 0;
+        self.columnCount = 0;
         self.cellSize = CGSizeZero;
     }
 }
@@ -118,10 +117,10 @@
     return frame;
 }
 
-- (void)setMinimumCellsNumber:(NSInteger)minimumCellsNumber
+- (void)setMinimumNumberOfCells:(NSUInteger)minimumNumberOfCells
 {
-    if (_minimumCellsNumber != minimumCellsNumber) self.resolved = NO;
-  _minimumCellsNumber = minimumCellsNumber;
+    if (minimumNumberOfCells != _minimumNumberOfCells) self.resolved = NO;
+    _minimumNumberOfCells = minimumNumberOfCells;
 }
 
 - (void)setSize:(CGSize)size
@@ -160,22 +159,55 @@
     _maxCellWidth = maxCellWidth;
 }
 
-- (NSInteger)rows
+- (NSUInteger)rowCount
 {
     [self validate];
-    return _rows;
+    return _rowCount;
 }
 
-- (NSInteger)columns
+- (NSUInteger)columnCount
 {
     [self validate];
-    return _columns;
+    return _columnCount;
 }
 
 - (CGSize)cellSize
 {
     [self validate];
     return _cellSize;
+}
+
+- (NSString *)description
+{
+    NSString *description = [NSString stringWithFormat:@"[%@] fitting %lu cells with aspect ratio %g into %@ -> ", NSStringFromClass([self class]), (unsigned long)self.minimumNumberOfCells, self.cellAspectRatio, NSStringFromCGSize(self.size)];
+
+    if (!self.rowCount) {
+        description = [description stringByAppendingString:@"invalid input: "];
+        if (!self.minimumNumberOfCells || !self.cellAspectRatio || !self.size.width || !self.size.height) {
+            if (!self.minimumNumberOfCells) description = [description stringByAppendingString:@"minimumNumberOfCells = 0;"];
+            if (!self.cellAspectRatio) description = [description stringByAppendingString:@"cellAspectRatio = 0;"];
+            if (!self.size.width) description = [description stringByAppendingString:@"size.width = 0;"];
+            if (!self.size.height) description = [description stringByAppendingString:@"size.height = 0;"];
+        } else {
+
+            if (self.minCellWidth || self.minCellHeight) {
+                description = [description stringByAppendingString:@"minimum width or height restricts grid to impossibility"];
+                if (self.minCellWidth && self.minCellHeight) {
+                    description = [description stringByAppendingFormat:@" (minCellWidth = %g, minCellHeight = %g)", self.minCellWidth, self.minCellHeight];
+                } else if (self.minCellWidth) {
+                    description = [description stringByAppendingFormat:@" (minCellWidth = %g)", self.minCellWidth];
+                } else {
+                    description = [description stringByAppendingFormat:@" (minCellHeight = %g)", self.minCellHeight];
+                }
+            } else {
+                description = [description stringByAppendingString:@"internal error"];
+            }
+        }
+    } else {
+        description = [description stringByAppendingFormat:@"%luc x %lur at %@ each", (unsigned long)self.columnCount, (unsigned long)self.rowCount, NSStringFromCGSize(self.cellSize)];
+    }
+
+    return description;
 }
 
 @end

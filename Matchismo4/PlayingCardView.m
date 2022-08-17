@@ -8,8 +8,11 @@
 @implementation PlayingCardView
 @synthesize faceCardScaleFactor = _faceCardScaleFactor;
 @synthesize enabled = _enabled;
+@synthesize selected = _selected;
 
 #define DEFAULT_FACE_CARD_SCALE_FACTOR 0.90
+
+#pragma mark - Methods
 
 -(void)setfaceCardScaleFactor:(CGFloat)faceCardScaleFactor {
   _faceCardScaleFactor = faceCardScaleFactor;
@@ -36,36 +39,77 @@
   return @[@"?", @"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"10", @"J", @"Q", @"K"][self.rank];
 }
 
--(void)drawRect:(CGRect)rect {
+- (void)setSelected:(BOOL)selected {
+  if (_selected != selected) {
+    _selected = selected;
+      [UIView transitionWithView:self
+                        duration:0.5
+                         options:UIViewAnimationOptionTransitionFlipFromLeft
+                      animations:^{
+                        [self setNeedsDisplay];
+                                  }
+                      completion:nil];
+    }
+  }
+
+#pragma mark - Drawing
+
+-(void)drawGeneralCard:(CGRect)rect {
   UIBezierPath *roundedRect = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:[self cornerRadius]];
-
   [roundedRect addClip]; // Keep the white only inside
-
   // use this for match
   UIColor *cellBackgroundColor = !self.isEnabled ? [UIColor colorWithWhite:0.5 alpha:0.5] : [UIColor whiteColor];
-
   [cellBackgroundColor setFill];
   UIRectFill(self.bounds);
-
   [[UIColor blackColor] setStroke];
   [roundedRect stroke];
+}
 
-
+-(void)drawCardFront {
   NSString *imageName = [NSString stringWithFormat:@"%@%@", [self rankAsStrings],self.suit];
-
-  if (self.selected) {
     UIImage *faceImage = [UIImage imageNamed:imageName];
-    if (faceImage) {
-      CGRect imageRect = CGRectInset(self.bounds,
-                                     self.bounds.size.width * (1.0-self.faceCardScaleFactor), self.bounds.size.height * (1.0-self.faceCardScaleFactor));
-      [faceImage drawInRect:imageRect];
-    } else {
-      [self drawPips];
-    }
-    [self drawPlayingCardCorners];
+  if (faceImage) {
+    CGRect imageRect = CGRectInset(self.bounds,
+                                   self.bounds.size.width * (1.0-self.faceCardScaleFactor), self.bounds.size.height * (1.0-self.faceCardScaleFactor));
+    [faceImage drawInRect:imageRect];
   } else {
-    [[UIImage imageNamed:@"cardback"] drawInRect:self.bounds];
+    [self drawPips];
   }
+  [self drawPlayingCardCorners];
+}
+
+-(void)drawCardBack {
+  [[UIImage imageNamed:@"cardback"] drawInRect:self.bounds];
+}
+
+-(void)drawRect:(CGRect)rect {
+  [self drawGeneralCard:rect];
+  if (self.selected) {
+    [self drawCardFront];
+  } else {
+    [self drawCardBack];
+  }
+}
+
+-(void)drawPlayingCardCorners {
+  NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+  paragraphStyle.alignment = NSTextAlignmentCenter;
+
+  UIFont *cornerFont = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+  cornerFont = [cornerFont fontWithSize:cornerFont.pointSize * [self cornerScaleFactor]];
+
+  NSAttributedString *cornerText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n%@", [self rankAsStrings], self.suit] attributes:@{NSFontAttributeName: cornerFont, NSParagraphStyleAttributeName: paragraphStyle}];
+
+  CGRect textBounds;
+  textBounds.origin = CGPointMake([self cornerOffset], [self cornerOffset]);
+  textBounds.size = [cornerText size];
+  [cornerText drawInRect:textBounds];
+
+  // Create the second size
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  CGContextTranslateCTM(context, self.bounds.size.width, self.bounds.size.height);
+  CGContextRotateCTM(context, M_PI);
+  [cornerText drawInRect:textBounds];
 }
 
 - (void)pushContextAndRotateUpsideDown
@@ -87,6 +131,7 @@
 #define PIP_VOFFSET1_PERCENTAGE 0.090
 #define PIP_VOFFSET2_PERCENTAGE 0.175
 #define PIP_VOFFSET3_PERCENTAGE 0.270
+#define PIP_FONT_SCALE_FACTOR 0.012
 
 - (void)drawPips
 {
@@ -116,8 +161,6 @@
                         mirroredVertically:YES];
     }
 }
-
-#define PIP_FONT_SCALE_FACTOR 0.012
 
 - (void)drawPipsWithHorizontalOffset:(CGFloat)hoffset
                       verticalOffset:(CGFloat)voffset
@@ -155,38 +198,7 @@
     }
 }
 
--(void)drawPlayingCardCorners {
-  NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-  paragraphStyle.alignment = NSTextAlignmentCenter;
-
-  UIFont *cornerFont = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-  cornerFont = [cornerFont fontWithSize:cornerFont.pointSize * [self cornerScaleFactor]];
-
-  NSAttributedString *cornerText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n%@", [self rankAsStrings], self.suit] attributes:@{NSFontAttributeName: cornerFont, NSParagraphStyleAttributeName: paragraphStyle}];
-
-  CGRect textBounds;
-  textBounds.origin = CGPointMake([self cornerOffset], [self cornerOffset]);
-  textBounds.size = [cornerText size];
-  [cornerText drawInRect:textBounds];
-
-  // Create the second size
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  CGContextTranslateCTM(context, self.bounds.size.width, self.bounds.size.height);
-  CGContextRotateCTM(context, M_PI);
-  [cornerText drawInRect:textBounds];
-}
-
-- (BOOL)drawFrontImage {
-    UIImage *faceImage = [UIImage imageNamed:@"cardfront"];
-    if (faceImage) {
-        CGRect imageRect = CGRectInset(self.bounds,
-                                       self.bounds.size.width * (1.0 - self.faceCardScaleFactor),
-                                       self.bounds.size.height * (1.0 - self.faceCardScaleFactor));
-        [faceImage drawInRect:imageRect];
-        return YES;
-    }
-    return NO;
-}
+#pragma mark - Gestures
 
 -(void)pinch:(UIPinchGestureRecognizer *)gesture {
   if ((gesture.state == UIGestureRecognizerStateChanged) || (gesture.state == UIGestureRecognizerStateEnded)) {

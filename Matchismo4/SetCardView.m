@@ -3,9 +3,10 @@
 
 #import "SetCardView.h"
 #import "SetCard.h"
+
 @interface SetCardView ()
-@property (strong, nonatomic) UIStackView *stackView;
 @end
+
 @implementation SetCardView
 static NSString* const DIAMOND = @"diamond";
 static NSString* const OVAL = @"oval";
@@ -22,7 +23,7 @@ float const SYMBOL_OFFSET = 0.05;
   if (self.selected) {
           UIBezierPath *selectBounds = [UIBezierPath bezierPathWithRoundedRect:self.bounds
                                                                   cornerRadius:[self cornerRadius]];
-          [selectBounds setLineWidth:10];
+          [selectBounds setLineWidth:30];
           [[UIColor purpleColor] setStroke];
           [selectBounds stroke];
       }
@@ -32,7 +33,7 @@ float const SYMBOL_OFFSET = 0.05;
     [roundedRect addClip];
 
     // use this for match
-    UIColor *cellBackgroundColor = !self.isEnabled ? [UIColor colorWithWhite:0.5 alpha:0.5] : [UIColor whiteColor];
+    UIColor *cellBackgroundColor = !self.isEnabled ? [UIColor colorWithWhite:0.8 alpha:0.5] : [UIColor whiteColor];
 
     [cellBackgroundColor setFill];
     UIRectFill(self.bounds);
@@ -53,19 +54,11 @@ float const SYMBOL_OFFSET = 0.05;
     [symbolPath setLineWidth:STROKE_WIDTH];
 
     CGFloat heightOffset = SYMBOL_HEIGHT + SYMBOL_OFFSET;
-    CGFloat offsetSymbol = 0.0;
+    CGFloat offsetSymbol = [self adjustCardOffsetToRank];
 
-    // adjust offset to card's rank
-    if (self.rank == 2) {
-        offsetSymbol = self.bounds.size.height * heightOffset / 2;
-    }
-    else if (self.rank == 3) {
-        offsetSymbol = self.bounds.size.height * heightOffset;
-    }
 
   // adjust beizer path to right shading
-    CGContextTranslateCTM(context, 0.0, -offsetSymbol);
-
+  CGContextTranslateCTM(context, 0.0, -offsetSymbol);
     for (int i = 0; i < self.rank; i++) {
         if ([self.shading isEqualToString:UNFILLED]) {
             [symbolPath stroke];
@@ -83,6 +76,17 @@ float const SYMBOL_OFFSET = 0.05;
         CGContextTranslateCTM(context, 0.0, self.bounds.size.height * heightOffset);
     }
     CGContextRestoreGState(context);
+}
+
+-(CGFloat)adjustCardOffsetToRank {
+  CGFloat heightOffset = SYMBOL_HEIGHT + SYMBOL_OFFSET;
+  if (self.rank == 2) {
+    return self.bounds.size.height * heightOffset / 2;
+  }
+  else if (self.rank == 3) {
+    return self.bounds.size.height * heightOffset;
+  }
+  return 0.0;
 }
 
 
@@ -212,32 +216,15 @@ float const SYMBOL_OFFSET = 0.05;
             [self addGestureRecognizer:self.tapGesture];
         } else {
             [self removeGestureRecognizer:self.tapGesture];
-        }
+              }
         _enabled = enabled;
     }
-}
-
-static const CGFloat STACK_SCALE_FACTOR = 0.75;
-
-- (UIStackView *)stackView {
-    if (!_stackView) {
-        CGRect scaledFrame = CGRectMake(0, 0, self.bounds.size.width * STACK_SCALE_FACTOR, self.bounds.size.height * STACK_SCALE_FACTOR);
-        _stackView = [[UIStackView alloc] initWithFrame:scaledFrame];
-        _stackView.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
-        _stackView.alignment = UIStackViewAlignmentFill;
-        _stackView.distribution = UIStackViewDistributionFillEqually;
-        _stackView.spacing = 5;
-        _stackView.axis = UILayoutConstraintAxisVertical;
-    }
-    return _stackView;
 }
 
 #pragma mark - Initialization
 
 -(void)setup {
-  [self addSubview:self.stackView];
-      self.autoresizesSubviews = YES;
-      self.stackView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//
 }
 
 -(void)awakeFromNib {

@@ -7,16 +7,16 @@
 
 @interface CardMatchingGame : NSObject
 
-// designated initializer
 - (instancetype)initWithCardCount:(NSUInteger)count usingDeck:(Deck *)deck;
 - (void)chooseCardAtIndex:(NSUInteger)index;
 - (Card *)cardAtIndex:(NSUInteger)index;
 - (void)resetWithCardCount:(NSUInteger)count UsingDeck:(Deck *)deck;
 -(void)setGameMode:(NSUInteger)mode;
 -(NSUInteger)gameMode;
+- (void)addCards:(int)amount;
 @property (nonatomic, getter=isStarted) BOOL started;
 @property (nonatomic,strong) Turn *turn;
-@property (nonatomic, strong) NSMutableArray *cards;
+@property (nonatomic, strong, readonly) NSMutableArray *cards;
 @property (nonatomic, readonly) NSInteger score;
 @property (nonatomic, strong) NSMutableArray<Turn *> *history;
 @end

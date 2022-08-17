@@ -4,5 +4,4 @@
 #import "CardView.h"
 
 @interface PlayingCardView : CardView
-
 @end

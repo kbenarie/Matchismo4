@@ -19,17 +19,6 @@ static float const CORNER_RADIUS = 12.0;
 }
 
 - (void)setSelected:(BOOL)selected {
-    if (_selected != selected) {
-        _selected = selected;
-        [UIView transitionWithView:self
-                          duration:0.4
-                           options:UIViewAnimationOptionTransitionFlipFromLeft
-                        animations:^{
-                            [self setNeedsDisplay];
-                        }
-                        completion:nil];
-
-    }
 }
 
 -(void)setSuit:(NSString *)suit {
@@ -67,7 +56,8 @@ static float const CORNER_RADIUS = 12.0;
     [self setup];
 }
 
--(void)setup { return;
+-(void)setup {
+  return;
 }
 
 -(void)awakeFromNib {

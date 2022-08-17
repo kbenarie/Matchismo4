@@ -2,9 +2,11 @@
 // Created by Keren Ben Arie.
 
 #import <Foundation/Foundation.h>
+#import "Card.h"
 
 @interface Turn : NSObject
 @property (strong, nonatomic) NSMutableArray* chosenCards;
 @property (nonatomic, getter=isMatched) BOOL matched;
 @property (nonatomic, getter=getPointsUpdate) NSInteger pointsUpdate;
+- (instancetype)initWithCard:(Card *)card;
 @end

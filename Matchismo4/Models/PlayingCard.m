@@ -4,12 +4,12 @@
 #import "PlayingCard.h"
 #import "Card.h"
 
-@implementation PlayingCard
+int const RANK_MATCH_SCORE = 4;
+int const SUIT_MATCH_SCORE = 1;
+float const LESS_MATCHES_THAN_CARDS_PENALTY = 0.1f;
+int const MINIMAL_SCORE_TO_APPLY_PENALTY = 1;
 
-static int const RANK_MATCH_SCORE = 4;
-static int const SUIT_MATCH_SCORE = 1;
-static float const LESS_MATCHES_THAN_CARDS_PENALTY = 0.1f;
-static int const MINIMAL_SCORE_TO_APPLY_PENALTY = 1;
+@implementation PlayingCard
 
 - (int)match:(NSArray<Card *> *)otherCards {
   int score = 0;

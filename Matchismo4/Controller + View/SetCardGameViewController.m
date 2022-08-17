@@ -10,10 +10,9 @@
 
 @interface SetCardGameViewController ()
 
+@property (weak, nonatomic) IBOutlet UILabel *cardLimitReachedLabel;
 @property (weak, nonatomic) IBOutlet SetCardView *setCardView;
-@property (strong, nonatomic) UIDynamicAnimator *animator;
-@property (strong, nonatomic) UIAttachmentBehavior *attachmentBehaviour;
-@property (weak, nonatomic) IBOutlet UIView *card;
+@property (weak, nonatomic) IBOutlet UIButton *cardsRequest;
 @property (strong, nonatomic) Deck *deck;
 
 @end
@@ -21,21 +20,17 @@
 @implementation SetCardGameViewController
 
 static int const SET_GAME_MODE = 1;
+static int const CARDS_AMOUNT_LIMIT = 81;
 
 -(int)cardsInitialAmount {
   return 12;
 }
+
+-(int)extraCardsNumber {
+  return 3;
+}
+
 #pragma mark - Lazy Inits
-
--(UIDynamicAnimator *)animator {
-  if (!_animator) _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.card];
-  return _animator;
-}
-
--(UIAttachmentBehavior *)attachmentBehaviour {
-  if (!_attachmentBehaviour) _attachmentBehaviour = [[UIAttachmentBehavior alloc] init];
-  return _attachmentBehaviour;
-}
 
 - (Deck *)deck {
   if (!_deck) _deck = [[SetPlayingCardDeck alloc] init];
@@ -44,7 +39,24 @@ static int const SET_GAME_MODE = 1;
 
 #pragma mark - methods
 
+- (IBAction)requestMoreCards:(UIButton *)sender {
+  if ([self.game.cards count] >= CARDS_AMOUNT_LIMIT) {
+    [UIView transitionWithView:self.cardLimitReachedLabel
+                      duration:0.5
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{
+        self.cardLimitReachedLabel.text = @"Thats enough, Nir!";
+    } completion: ^(BOOL finished){
+      self.cardLimitReachedLabel.text = @"";
+    }];
+  } else {
+    [self.game addCards:[self extraCardsNumber]];
+    [self updateUI];
+  }
+}
+
 - (Deck *)createDeck {
+  NSLog(@"being called");
   return [[SetPlayingCardDeck alloc] init];
 }
 
@@ -52,7 +64,8 @@ static int const SET_GAME_MODE = 1;
   return SET_GAME_MODE;
 }
 
-- (CardView *)newCardViewWithFrame:(CGRect)frame { return [[SetCardView alloc] initWithFrame:frame];
+- (CardView *)newCardViewWithFrame:(CGRect)frame {
+  return [[SetCardView alloc] initWithFrame:frame];
 }
 
 - (BOOL)mapCard:(Card *)card toView:(CardView *)view {
@@ -69,6 +82,18 @@ static int const SET_GAME_MODE = 1;
     cardView.selected = setCard.isChosen;
     cardView.enabled = !setCard.isMatched;
     return YES;
+}
+
+- (BOOL)isNeedRemoveFromBoard {
+    BOOL result = NO;
+    for (CardView *view in self.boardView.subviews) {
+        if (!view.enabled) {
+            [self.cardViewsToRemove addObject:view];
+            result = YES;
+        }
+    }
+    self.grid.minimumNumberOfCells -= [self.cardViewsToRemove count];
+    return result;
 }
 
 @end

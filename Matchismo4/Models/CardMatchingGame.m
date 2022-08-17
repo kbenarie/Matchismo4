@@ -9,7 +9,7 @@
 @property (nonatomic, readwrite) NSInteger score;
 @property (nonatomic, readwrite) NSUInteger gameMode;
 @property (nonatomic, readwrite) Deck *deck;
-
+@property (nonatomic, strong, readwrite) NSMutableArray *cards;
 @end
 
 @implementation CardMatchingGame
@@ -18,10 +18,6 @@ static int const MATCH_BONUS = 4;
 static int const COST_TO_CHOOSE = 1;
 static int const GAMEMODE_ADDITION_TO_GET_CARDS = 2;
 
-- (NSMutableArray<Turn *>*)history {
-  if (!_history) _history = [[NSMutableArray<Turn *> alloc] init];
-  return _history;
-}
 
 - (NSMutableArray *)cards {
   if (!_cards) _cards = [[NSMutableArray alloc] init];
@@ -45,6 +41,7 @@ static int const GAMEMODE_ADDITION_TO_GET_CARDS = 2;
    [self.cards addObject:card];
     }
   }
+//  NSLog(@"init with %d", [self.cards count]);
 }
 
 - (void)resetWithCardCount:(NSUInteger)count UsingDeck:(Deck *)deck {
@@ -73,46 +70,90 @@ static int const GAMEMODE_ADDITION_TO_GET_CARDS = 2;
   return _gameMode;
 }
 
+-(void)generateNextTurnAccordingToCurrentTurn {
+  if (!self.turn.isMatched) {
+    Card *cardToSave = [self.turn.chosenCards lastObject];
+    self.turn = [[Turn alloc] initWithCard:cardToSave];
+  } else {
+    self.turn = [[Turn alloc] init];
+  }
+}
+
+-(void)makeCardBeChosen:(Card *)card {
+  [self.turn.chosenCards addObject:card];
+  card.chosen = YES;
+}
+
+
+-(void)makeCardBeUnchosen:(Card *)card {
+  card.chosen = NO;
+  [self.turn.chosenCards removeObject:card];
+}
+
+-(BOOL)didStartedNewTurn {
+  return ([self.turn.chosenCards count] > [self amountOfCardsFromCurrentGameMode] - 1);
+}
+
+-(BOOL)didChoseEnoughCards {
+  return ([self.turn.chosenCards count] == [self amountOfCardsFromCurrentGameMode]);
+}
+
 - (void)chooseCardAtIndex:(NSUInteger)index {
   Card *card = [self cardAtIndex:index];
   if (!card.isMatched) {
     if (card.isChosen) {
-      card.chosen = NO; // flip it back
-      [self.turn.chosenCards removeObject:card];
+      [self makeCardBeUnchosen:card];
     } else {
-      if ([self.turn.chosenCards count] > [self amountOfCardsFromCurrentGameMode] - 1) {
-        self.turn = [[Turn alloc] init];
+      if ([self didStartedNewTurn]) {
+        [self generateNextTurnAccordingToCurrentTurn];
       }
-      [self.turn.chosenCards addObject:card];
-      self.score -= COST_TO_CHOOSE;
-      card.chosen = YES;
+      [self makeCardBeChosen:card];
     }
-    if ([self.turn.chosenCards count] == [self amountOfCardsFromCurrentGameMode]) {
+    if ([self didChoseEnoughCards]) {
       [self handleChosenCardsUsingCard:card andIndex:index];
     }
   }
 }
 
+-(void)makeTurnMatchedWithScore:(int) matchScore {
+  self.score += matchScore * MATCH_BONUS;
+  self.turn.matched = YES;
+  self.turn.pointsUpdate = matchScore * MATCH_BONUS;
+}
+
+
+-(void)makeTurnUnmatchedWithPenalty:(int) penalty {
+  self.score -= penalty;
+  self.turn.matched = NO;
+  self.turn.pointsUpdate = penalty;
+}
+
+-(void)matchCardsWithScore:(int) matchScore{
+  for (Card *otherCard in self.turn.chosenCards) {
+    otherCard.matched = YES;
+  }
+  [self makeTurnMatchedWithScore:matchScore];
+}
+
+-(void)unmatchCardsWithCard:(Card *)card andPenalty:(int) penalty{
+  for (Card *otherCard in self.turn.chosenCards) {
+    if (otherCard != card) {
+      otherCard.chosen = NO;
+    }
+  }
+  [self makeTurnUnmatchedWithPenalty:penalty];
+  self.score -= COST_TO_CHOOSE;
+}
+
+
 - (void)handleChosenCardsUsingCard:(Card *)card andIndex:(NSUInteger)index {
   int matchScore = [card match:self.turn.chosenCards];
   if (matchScore) {
-    self.score += matchScore * MATCH_BONUS;
-    for (Card *otherCard in self.turn.chosenCards) {
-      otherCard.matched = YES;
-    }
-    self.turn.matched = YES;
-    self.turn.pointsUpdate = matchScore * MATCH_BONUS;
+    [self matchCardsWithScore:matchScore];
   } else {
     int penalty = MISMATCH_PENALTY * (int)(self.gameMode + 1);
-    self.score -= penalty;
-    for (Card *otherCard in self.turn.chosenCards) {
-      otherCard.chosen = NO;
+    [self unmatchCardsWithCard:card andPenalty:penalty];
     }
-    self.turn.matched = NO;
-    self.turn.pointsUpdate = penalty;
-  }
-  self.score -= COST_TO_CHOOSE;
-  [self.history addObject:self.turn];
   }
 
 - (Card *)cardAtIndex:(NSUInteger)index {
@@ -126,5 +167,13 @@ static int const GAMEMODE_ADDITION_TO_GET_CARDS = 2;
   return self.gameMode + GAMEMODE_ADDITION_TO_GET_CARDS;
 }
 
+- (void)addCards:(int)amount {
+  for (int i=0; i< amount; ++i) {
+    Card *card = [self.deck drawRandomCard];
+    if (card){
+      [self.cards addObject:card];
+    }
+  }
+}
 @end
 
